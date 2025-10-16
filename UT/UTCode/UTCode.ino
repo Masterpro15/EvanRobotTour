@@ -1,5 +1,4 @@
 #include <TektiteRotEv.h>
-//test github...dededededede
 RotEv rotev;
 double vErr1, vErr2;
 double lt0, ls0, rt0, rs0;
@@ -99,9 +98,7 @@ void loop() {
   if (going) {
     foward(50, 5);
     going = false;
-    break;
   }
-  break;
 }
 
 
@@ -110,13 +107,13 @@ void loop() {
 
 
 
-//im so sorry jay for stealing some of your code + logic, i dont know hopw to do a motion profile 
+//sorry
 void foward(double distance, double time){
   float angleL;
   float angleR;
   float delta1, delta2;
   float prevAngleL,prevAngleR;
-  float distanceL, distanceR,
+  float distanceL, distanceR;
   float vBat = rotev.getVoltage();
   //update gryo + encoder
   double t0 = micros(); // Start time in microseconds
