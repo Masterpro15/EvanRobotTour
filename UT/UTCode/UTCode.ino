@@ -7,9 +7,6 @@ double kP = 0.1;
 double delayer_amt;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
-// +1 or -1 so that "forward" makes total_cm INCREASE
- const int ENC_L = 1;   // set after a quick test
- const int ENC_R = -1;   // set after a quick test
 
 
 
@@ -23,6 +20,8 @@ bool goPressed = false;
 
 // Variable to see if the GO functionality is currently active
 bool going = false;
+
+
 
 float unwrapAngle(float delta) {
   if (delta > M_PI) {
