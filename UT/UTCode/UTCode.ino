@@ -7,7 +7,6 @@ double kP = 0.1;
 double delayer_amt;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
-
 void setup() {
   rotev.begin();
   Serial.println("Hello, RotEv!");  // rotev.begin() automatically starts Serial
@@ -18,8 +17,6 @@ bool goPressed = false;
 
 // Variable to see if the GO functionality is currently active
 bool going = false;
-
-
 
 float unwrapAngle(float delta) {
   if (delta > M_PI) {
@@ -44,24 +41,6 @@ double vR(double d)
   rt0 = micros();
   return velocity;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -109,18 +88,21 @@ void loop() {
 
 //sorry
 void foward(double distance, double time){
-  float angleL;
-  float angleR;
-  float delta1, delta2;
-  float prevAngleL,prevAngleR;
-  float distanceL, distanceR;
+  float angleL = 0;
+  float angleR = 0;
+  float delta1 = 0;
+  float delta2 = 0;
+  float prevAngleL = 0;
+  float prevAngleR = 0
+  float distanceL = 0;
+  float distanceR = 0;
   float vBat = rotev.getVoltage();
   //update gryo + encoder
   double t0 = micros(); // Start time in microseconds
   double delta_T = time;
   double delta_T_us = delta_T * 1e6; // Convert delta_T from seconds to microseconds
-  double motor1PWM = 0; //set to the min duty cycle
-  double motor2PWM = 0;
+  double power1 = 0; //set to the min duty cycle
+  double power2 = 0;
   float roDistance = 0;
   double velocity_setpoint = 0;
   double elapsed_time;
@@ -165,19 +147,22 @@ void foward(double distance, double time){
 
     vErr1 = velocity_setpoint - vL(distanceL);
     vErr2 = velocity_setpoint - vR(distanceR);//look above;
-    motor1PWM += kP * vErr1;
-    motor2PWM += kP * vErr2;
-
-
-
-    
-    // motor1PWM = constrain(motor1PWM, 0.05f,  1.0f);
-    // motor2PWM = constrain(motor2PWM, 0.05f, 1.0f);
-
-    rotev.motorWrite1(motor1PWM *-1.0f); 
-    rotev.motorWrite2(motor2PWM *-1.0f); 
+    power1 = kP * vErr1;
+    power2 = kP * vErr2;
   
+  
+    // power1 = constrain(power1, -1.0f, 1.0f);
+    // power2 = constrain(power2, -1.0f, 1.0f);
+
+    rotev.motorWrite1(power1 *-0.1f); 
+    rotev.motorWrite2(power2 *-0.1f); 
+
     Serial.println(roDistance);
+    Serial.print(" ");
+    Serial.print(distanceL);
+    Serial.print(" ");
+    Serial.print(distanceR);
+
 
   }
     rotev.motorWrite1(0); 
