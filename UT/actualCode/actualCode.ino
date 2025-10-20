@@ -1,13 +1,5 @@
-void setup() {
-  // put your setup code here, to run once:
 
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}
-a#include <TektiteRotEv.h>
+#include <TektiteRotEv.h>
 RotEv rotev;
 
 
@@ -40,6 +32,9 @@ bool going = false;
 float delta1 = 0;
 float delta2 = 0;
 
+float totalAngleL = 0;
+float totalAngleR = 0;
+
 float prevAngleL;
 float prevAngleR;
 
@@ -66,10 +61,9 @@ float unwrapAngle(float delta) {
 }
 
 double dL() { 
-  return delta1 * CM_PER_RAD;
-}
+  return totalAngleL * CM_PER_RAD;  
 double dR() { 
-  return delta2 * CM_PER_RAD;
+  return totalAngleR * CM_PER_RAD;  
 }
 double vL()
 {
@@ -133,6 +127,11 @@ void foward(double distance, double time)
     delta1 = unwrapAngle(angleL-prevAngleL);
     delta2 = unwrapAngle(angleR-prevAngleR);
 
+    totalAngleL += delta1;
+    totalAngleR += delta2;
+
+    prevAngleL = angleL;
+    prevAngleR = angleR;
     // Exit condition: Distance has been covered or time has exceeded delta_T
     if (dR() >= distance)
     {
@@ -165,15 +164,19 @@ void foward(double distance, double time)
     power2 += kP * vErr2;
 
     // Constrain PWM values to valid range
-    power1 = constrain(power1, 0.05f, 0.5f);
-    power2 = constrain(power2, 0.05f, 0.5f);
+    power1 = constrain(power1, 0.1f, 0.67f);
+    power2 = constrain(power2, 0.1f, 0.67f);
+    Serial.println(dR());
+
+    rotev.motorWrite1(-power1); 
+    rotev.motorWrite2(-power2); 
 
     delay(0.2);
   }
 
   // Stop motors at the end
-    rotev.motorWrite1(-power1); 
-    rotev.motorWrite2(-power2);  
+    rotev.motorWrite1(0); 
+    rotev.motorWrite2(0);  
     delay(10 + delayer_amt); // Small delay to ensure stop
     //reset t]stuff
       reset();
