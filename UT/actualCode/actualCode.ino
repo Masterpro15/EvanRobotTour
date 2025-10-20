@@ -193,10 +193,10 @@ void foward(double distance, double time)
 void updateGyro()
 {
   gyroRate = rotev.readYawRateDegrees(); // Returns yaw rate in deg/s
-  uint16_t currentT = micros();
-  uint16_t dt = currentT - lastGyro;
+  double currentT = micros();
+  double dt = currentT - lastGyro;
   lastGyro = currentT;
-  turnAngle += gyroRate;
+  turnAngle += gyroRate * dt;
 }
 double heading()
 {
