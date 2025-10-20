@@ -3,7 +3,7 @@
 RotEv rotev;
 
 
-double kP = 0.1;
+double kP = 1;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
 double vErr1, vErr2;
@@ -60,11 +60,8 @@ float unwrapAngle(float delta) {
   return delta;
 }
 
-double dL() { 
-  return totalAngleL * CM_PER_RAD;  
-double dR() { 
-  return totalAngleR * CM_PER_RAD;  
-}
+double dL() { return totalAngleL * CM_PER_RAD; }
+double dR() { return totalAngleR * CM_PER_RAD; }
 double vL()
 {
   double vel = (dL() - ls0) / (micros() - lt0) * 1000000;
@@ -84,6 +81,8 @@ void foward(double distance, double time)
    updateGyro();  
    prevAngleL = -rotev.enc1Angle();
    prevAngleR = rotev.enc2Angle();
+  totalAngleL = 0;
+  totalAngleR = 0;
 
   double t0 = micros(); // Start time in microseconds
   double delta_T = time;
@@ -92,9 +91,11 @@ void foward(double distance, double time)
   double velocity_setpoint = 0; // Initialize the velocity setpoint
   double elapsed_time;
 
-  double power1 = 0; //set to the min duty cycle
-  double power2 = 0;
+  double power1 = 0.2; //set to the min duty cycle
+  double power2 = 0.2;
+  
 
+  
   // Main control loop
   while (true)
   {
@@ -164,14 +165,13 @@ void foward(double distance, double time)
     power2 += kP * vErr2;
 
     // Constrain PWM values to valid range
-    power1 = constrain(power1, 0.1f, 0.67f);
-    power2 = constrain(power2, 0.1f, 0.67f);
-    Serial.println(dR());
+    power1 = constrain(power1, 0.5f, 1.0f);
+    power2 = constrain(power2, 0.5f, 1.0f);
+    Serial.println(-power1);
 
     rotev.motorWrite1(-power1); 
     rotev.motorWrite2(-power2); 
 
-    delay(0.2);
   }
 
   // Stop motors at the end
@@ -197,7 +197,7 @@ void updateGyro()
 {
   gyroRate = rotev.readYawRateDegrees(); // Returns yaw rate in deg/s
   double currentT = micros();
-  double dt = currentT - lastGyro;
+  double dt = (currentT - lastGyro) / 1e6;;
   lastGyro = currentT;
   turnAngle += gyroRate * dt;
 }
@@ -232,7 +232,10 @@ void loop() {
 
   // Motor writes
   if (going) {
-    foward(50, 5);
+    foward(50, 3);
+    Serial.println("THE PATH IS DONEEEEED");
+    Serial.println(rotev.getVoltage());
+
     going = false;
 
   }
