@@ -232,7 +232,8 @@ void loop() {
 
   // Motor writes
   if (going) {
-    foward(50, 3);
+    rotev.motorWrite1(2.0f); 
+    rotev.motorWrite2(1.0f); 
     Serial.println("THE PATH IS DONEEEEED");
     Serial.println(rotev.getVoltage());
 
