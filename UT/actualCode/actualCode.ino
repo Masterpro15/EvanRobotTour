@@ -134,10 +134,16 @@ void foward(double distance, double time)
     prevAngleL = angleL;
     prevAngleR = angleR;
     // Exit condition: Distance has been covered or time has exceeded delta_T
+    // if (dR() >= distance - 3) {  // within 3 cm of goal
+    //   power1 = 0.25f;
+    //   power2 = 0.25f;   
+    // }
+
     if (dR() >= distance)
     {
       break;
     }
+    
 
     // Determine velocity setpoint based on elapsed time
     if (elapsed_time <= delta_T_us / 4)
@@ -161,17 +167,19 @@ void foward(double distance, double time)
     vErr1 = velocity_setpoint - vL();
     vErr2 = velocity_setpoint - vR();
 
-    power1 += kP * vErr1;
-    power2 += kP * vErr2;
+    power1 = kP * vErr1;
+    power2 = kP * vErr2;
 
     // Constrain PWM values to valid range
-    power1 = constrain(power1, 0.05f, 0.75f);
-    power2 = constrain(power2, 0.05f, 0.75f);
+    power1 = constrain(power1, 0.2f, 1.0f);
+    power2 = constrain(power2, 0.2, 1.0f);
     Serial.println(dR());
+    Serial.print("Angle Test: ");
     Serial.println(heading());
+
     rotev.motorWrite1(-power1); 
     rotev.motorWrite2(-power2); 
-
+    delay(5);
   }
 
   // Stop motors at the end
@@ -233,8 +241,7 @@ void loop() {
 
   // Motor writes
   if (going) {
-    rotev.motorWrite1(2.0f); 
-    rotev.motorWrite2(1.0f); 
+    foward(50, 3);
     Serial.println("THE PATH IS DONEEEEED");
     Serial.println(rotev.getVoltage());
 
