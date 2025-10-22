@@ -3,7 +3,7 @@
 RotEv rotev;
 
 
-double kP = 1;
+double kP = 0.1;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
 double vErr1, vErr2;
@@ -84,16 +84,16 @@ void foward(double distance, double time)
   totalAngleL = 0;
   totalAngleR = 0;
 
-  double t0 = micros(); // Start time in microseconds
+  double t0 = micros(); 
   double delta_T = time;
-  double delta_T_us = delta_T * 1e6; // Convert delta_T from seconds to microseconds
-
-  double velocity_setpoint = 0; // Initialize the velocity setpoint
+  double delta_T_us = delta_T * 1e6; 
+  double velocity_setpoint = 0; 
   double elapsed_time;
 
-  double power1 = 0.2; //set to the min duty cycle
-  double power2 = 0.2;
+  double power1 = 0.08; 
+  double power2 = 0.08;
   
+      rotev.motorEnable(true);
 
   
   // Main control loop
@@ -165,10 +165,10 @@ void foward(double distance, double time)
     power2 += kP * vErr2;
 
     // Constrain PWM values to valid range
-    power1 = constrain(power1, 0.5f, 1.0f);
-    power2 = constrain(power2, 0.5f, 1.0f);
-    Serial.println(-power1);
-
+    power1 = constrain(power1, 0.05f, 0.75f);
+    power2 = constrain(power2, 0.05f, 0.75f);
+    Serial.println(dR());
+    Serial.println(heading());
     rotev.motorWrite1(-power1); 
     rotev.motorWrite2(-power2); 
 
@@ -178,6 +178,7 @@ void foward(double distance, double time)
     rotev.motorWrite1(0); 
     rotev.motorWrite2(0);  
     delay(10 + delayer_amt); // Small delay to ensure stop
+
     //reset t]stuff
       reset();
       prevAngleL = -rotev.enc1Angle();
