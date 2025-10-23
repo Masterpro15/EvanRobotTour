@@ -3,7 +3,7 @@ RotEv rotev;
 
 
 double kP = 0.1;
-double kGyro = 0.01;
+double kGyro = 0.0234;
 // double kT - 0.001;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
@@ -175,7 +175,9 @@ void foward(double distance, double time)
     Serial.println(dR());
     Serial.print("Angle Test: ");
     Serial.println(heading());
-    power2 -= kGyro * heading();
+    // power2 -= kGyro * heading();
+    power1 += kGyro * heading();
+
     rotev.motorWrite1(-power1); 
     rotev.motorWrite2(-power2); 
     delay(5);
@@ -261,6 +263,34 @@ void turnRight(){
       rotev.motorWrite1(0); 
       rotev.motorWrite2(0); 
       reset(); 
+      delay(250); 
+
+}
+void turnLeft(){ 
+  reset(); 
+  float motorDuty; 
+  rotev.motorEnable(true); 
+  calibrateGyro(); 
+  Serial.println(heading()); 
+  updateGyro(); 
+  while(true){ 
+    if ( heading() > 90) { break; }
+     if (rotev.stopButtonPressed()) { rotev.motorWrite1(0.0f);
+      rotev.motorWrite2(0.0f); rotev.motorEnable(false); 
+      going = false; Serial.println("<< STOP pressed >>"); // optional: wait until button released so you don't instantly restart
+       while (rotev.stopButtonPressed()) { delay(10); } return; // abort foward() immediately
+        } 
+    Serial.println(heading()); 
+    updateGyro();
+     rotev.motorWrite1(0.1f); 
+     rotev.motorWrite2(-0.1f); 
+     } 
+     Serial.println("Turn Done");
+      rotev.motorWrite1(0); 
+      rotev.motorWrite2(0); 
+      reset(); 
+      delay(250); 
+
 }
 // void turnRight(double target){
 //   reset();
@@ -316,7 +346,7 @@ double heading()
 void calibrateGyro(){
   rotev.ledWrite(0.0f, 0.1f, 0.1f);
   gyroOffset = 0;
-  int loops = 2000;
+  int loops = 5000;
   delay(5);
     for(int i = 0; i<=loops;i++){
       gyroOffset += rotev.readYawRateDegrees();
@@ -355,6 +385,7 @@ void loop() {
 
     foward(50, 3);
     turnRight();
+    turnLeft();
     Serial.println(rotev.getVoltage());
     going = false;     
   }
