@@ -2,8 +2,9 @@
 RotEv rotev;
 
 
-double kP = 0.3;
-double kGyro = 0.03;
+double kP = 0.1;
+double kGyro = 0.01;
+// double kT - 0.001;
 const float CM_PER_RAD = (2.375f * 2.54f) / 2.0f;  
 
 double vErr1, vErr2;
@@ -98,8 +99,8 @@ void foward(double distance, double time)
   double power1 = 0.08; 
   double power2 = 0.08;
   
-      rotev.motorEnable(true);
-
+  rotev.motorEnable(true);
+  reset();
   
   // Main control loop
   while (true)
@@ -169,8 +170,8 @@ void foward(double distance, double time)
 
     
     // Constrain PWM values to valid range
-    power1 = constrain(power1, 0.2f, 1.0f);
-    power2 = constrain(power2, 0.2f, 1.0f);
+    power1 = constrain(power1, 0.15f, 1.0f);
+    power2 = constrain(power2, 0.15f, 1.0f);
     Serial.println(dR());
     Serial.print("Angle Test: ");
     Serial.println(heading());
@@ -182,71 +183,92 @@ void foward(double distance, double time)
 
   // Stop motors at the end
     rotev.motorWrite1(0); 
-    rotev.motorWrite2(0);  
-    delay(100); 
+    rotev.motorWrite2(0);
+    reset();
+  
+    delay(250); 
     prevAngleL = -rotev.enc1Angle();
     prevAngleR = rotev.enc2Angle();
 
     //reset t]stuff
-      reset();
+    reset();
     
 }
 
-void turnRight(){
-  reset();
-  float motorDuty;
-  rotev.motorEnable(true);  
-  Serial.println(heading());
-  updateGyro();
+// void turnRight(){
+//   reset();
+//   float motorDuty;
+//   rotev.motorEnable(true);  
+//   Serial.println(heading());
+//   updateGyro();
 
-  while(true){
+//   while(true){
 
-    if ( heading() < -89.5)
-    {
-      break;
-    }
+//     if ( heading() < -89.5)
+//     {
+//       break;
+//     }
     
 
 
 
-    if (rotev.stopButtonPressed()) {
-    rotev.motorWrite1(0.0f);
-    rotev.motorWrite2(0.0f);
-    rotev.motorEnable(false);
-    going = false;
-    Serial.println("<< STOP pressed >>");
-    // optional: wait until button released so you don't instantly restart
-    while (rotev.stopButtonPressed()) { delay(10); }
-    return; // abort foward() immediately
-    }
+//     if (rotev.stopButtonPressed()) {
+//     rotev.motorWrite1(0.0f);
+//     rotev.motorWrite2(0.0f);
+//     rotev.motorEnable(false);
+//     going = false;
+//     Serial.println("<< STOP pressed >>");
+//     // optional: wait until button released so you don't instantly restart
+//     while (rotev.stopButtonPressed()) { delay(10); }
+//     return; // abort foward() immediately
+//     }
 
 
 
-      Serial.println(heading());
+//       Serial.println(heading());
 
 
+//     updateGyro();
+//     rotev.motorWrite1(-0.1f); 
+//     rotev.motorWrite2(0.1f);  
+//   }
+//   Serial.println("Turn Done");
+//   rotev.motorWrite1(0); 
+//   rotev.motorWrite2(0);  
+//   reset();
+// }
+
+void turnRight(){ 
+  reset(); 
+  float motorDuty; 
+  rotev.motorEnable(true); 
+  calibrateGyro(); 
+  Serial.println(heading()); 
+  updateGyro(); 
+  while(true){ 
+    if ( heading() < -89.5) { break; }
+     if (rotev.stopButtonPressed()) { rotev.motorWrite1(0.0f);
+      rotev.motorWrite2(0.0f); rotev.motorEnable(false); 
+      going = false; Serial.println("<< STOP pressed >>"); // optional: wait until button released so you don't instantly restart
+       while (rotev.stopButtonPressed()) { delay(10); } return; // abort foward() immediately
+        } 
+    Serial.println(heading()); 
     updateGyro();
-    rotev.motorWrite1(-0.1f); 
-    rotev.motorWrite2(0.1f);  
-  }
-  Serial.println("Turn Done");
-  rotev.motorWrite1(0); 
-  rotev.motorWrite2(0);  
-  reset();
+     rotev.motorWrite1(-0.1f); 
+     rotev.motorWrite2(0.1f); 
+     } 
+     Serial.println("Turn Done");
+      rotev.motorWrite1(0); 
+      rotev.motorWrite2(0); 
+      reset(); 
 }
-
-
 // void turnRight(double target){
 //   reset();
 //   float motorDuty;
 //   updateGyro();
 //   rotev.motorEnable(true);  
-//   calibrateGyro();
 
 //   while(heading() < target){
-
-
-
 
 
 //     if (rotev.stopButtonPressed()) {
@@ -265,7 +287,7 @@ void turnRight(){
 
 
 //     updateGyro();
-//     motorDuty  =  abs(target - heading()) * kT;
+//     motorDuty  =  conabs(target - heading()) * kT;
 //     rotev.motorWrite1(-motorDuty); 
 //     rotev.motorWrite2(motorDuty);  
 //   }
@@ -281,7 +303,7 @@ void turnRight(){
 // frequently as possible while using the gyro to do turns.
 void updateGyro()
 {
-  gyroRate = rotev.readYawRateDegrees() - gyroOffset - 0.2; // Returns yaw rate in deg/s
+  gyroRate = rotev.readYawRateDegrees() - gyroOffset; // Returns yaw rate in deg/s
   double currentT = micros();
   double dt = (currentT - lastGyro) / 1e6;
   lastGyro = currentT;
@@ -327,18 +349,12 @@ void loop() {
 
   // Motor writes
   if (going) {
-    delay(500);
     reset();
     calibrateGyro();
+            delay(500);
+
     foward(50, 3);
     turnRight();
-    foward(50, 3);
-    turnRight();
-    foward(50, 3);
-    turnRight();
-    foward(50, 3);
-    turnRight();
-    // foward(25, 2);
     Serial.println(rotev.getVoltage());
     going = false;     
   }
