@@ -81,6 +81,121 @@ double vR()
   rt0 = micros();
   return vel;
 }
+void back(double distance, double time)
+{
+
+   updateGyro();  
+   prevAngleL = -rotev.enc1Angle();
+   prevAngleR = rotev.enc2Angle();
+  totalAngleL = 0;
+  totalAngleR = 0;
+
+  double t0 = micros(); 
+  double delta_T = time;
+  double delta_T_us = delta_T * 1e6; 
+  double velocity_setpoint = 0; 
+  double elapsed_time;
+
+  double power1 = 0.08; 
+  double power2 = 0.08;
+  
+  rotev.motorEnable(true);
+  reset();
+  
+  // Main control loop
+  while (true)
+  {
+
+    if (rotev.stopButtonPressed()) {
+    rotev.motorWrite1(0.0f);
+    rotev.motorWrite2(0.0f);
+    rotev.motorEnable(false);
+    going = false;
+    Serial.println("<< STOP pressed >>");
+    // optional: wait until button released so you don't instantly restart
+    while (rotev.stopButtonPressed()) { delay(10); }
+    return; // abort foward() immediately
+    }
+
+
+    elapsed_time = micros() - t0; // Elapsed time in microseconds
+    updateGyro();
+    angleL = -rotev.enc1Angle();
+    angleR = rotev.enc2Angle();
+
+    delta1 = unwrapAngle(angleL-prevAngleL);
+    delta2 = unwrapAngle(angleR-prevAngleR);
+
+    totalAngleL += delta1;
+    totalAngleR += delta2;
+
+    prevAngleL = angleL;
+    prevAngleR = angleR;
+    // Exit condition: Distance has been covered or time has exceeded delta_T
+    // if (dR() >= distance - 3) {  // within 3 cm of goal
+    //   power1 = 0.25f;
+    //   power2 = 0.25f;   
+    // }
+
+    if (fabs(dR()) >= distance)
+    {
+      break;
+    }
+    
+
+    // Determine velocity setpoint based on elapsed time
+    if (elapsed_time <= delta_T_us / 4)
+    {
+      // Acceleration phase
+      velocity_setpoint = - (16.0 * distance) / (3.0 * delta_T * delta_T) * (elapsed_time / 1e6);
+    }
+    else if (elapsed_time <= 3 * delta_T_us / 4)
+    {
+      // Constant velocity phase
+      velocity_setpoint = - (4.0 * distance) / (3.0 * delta_T);
+    }
+    else
+    {
+      // Deceleration phase
+      double t_dec = elapsed_time - 3 * delta_T_us / 4;
+      velocity_setpoint = - (16.0 * distance) / (3.0 * delta_T * delta_T) * ((delta_T / 4) - t_dec / 1e6);
+    }
+
+    // Update PWM values based on velocity feedback and setpoint
+    vErr1 = velocity_setpoint - vL();
+    vErr2 = velocity_setpoint - vR();
+
+    power1 = kP * vErr1;
+    power2 = kP * vErr2;
+
+    
+    // Constrain PWM values to valid range
+    power1 = constrain(power1, -1.0f, -0.15f);
+    power2 = constrain(power2, -1.0f, -0.15f);
+    Serial.println(dR());
+    Serial.print("Angle Test: ");
+    Serial.println(heading());
+    // power2 -= kGyro * heading();
+    power1 += kGyro * heading();
+
+    rotev.motorWrite1(-power1); 
+    rotev.motorWrite2(-power2); 
+    delay(5);
+  }
+
+  // Stop motors at the end
+    rotev.motorWrite1(0); 
+    rotev.motorWrite2(0);
+    reset();
+  
+    delay(250); 
+    prevAngleL = -rotev.enc1Angle();
+    prevAngleR = rotev.enc2Angle();
+
+    //reset t]stuff
+    reset();
+    
+}
 void foward(double distance, double time)
 {
 
@@ -383,12 +498,14 @@ void loop() {
     calibrateGyro();
             delay(500);
 
-    foward(50, 3);
-    turnRight();
-    turnLeft();
+    // foward(50, 3);
+    // turnRight();
+    // turnLeft();
+    back(50, 3);
     Serial.println(rotev.getVoltage());
     going = false;     
   }
 }
+
 
 
