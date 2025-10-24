@@ -188,7 +188,7 @@ void back(double distance, double time)
     rotev.motorWrite2(0);
     reset();
   
-    delay(250); 
+    delay(350); 
     prevAngleL = -rotev.enc1Angle();
     prevAngleR = rotev.enc2Angle();
 
@@ -303,7 +303,7 @@ void foward(double distance, double time)
     rotev.motorWrite2(0);
     reset();
   
-    delay(250); 
+    delay(350); 
     prevAngleL = -rotev.enc1Angle();
     prevAngleR = rotev.enc2Angle();
 
@@ -378,7 +378,7 @@ void turnRight(){
       rotev.motorWrite1(0); 
       rotev.motorWrite2(0); 
       reset(); 
-      delay(250); 
+      delay(350); 
 
 }
 void turnLeft(){ 
@@ -404,7 +404,7 @@ void turnLeft(){
       rotev.motorWrite1(0); 
       rotev.motorWrite2(0); 
       reset(); 
-      delay(250); 
+      delay(350); 
 
 }
 // void turnRight(double target){
@@ -498,27 +498,10 @@ void loop() {
     calibrateGyro();
             delay(500);
 
-     foward(25, 2);
-     foward(50, 3);
-          turnRight();
+     foward(25, 3);
+     foward(50, 4);
+    
 
-     foward(50, 3);
-     turnRight();
-
-     foward(50, 3);
-      back(200, 12);
-      foward(50, 3);
-
-     turnRight();
-         foward(100, 6);
-     turnRight();
-     foward(50, 3);
-
-     
-     turnLeft();
-
-    foward(50,3);
-    back(50, 3);
     Serial.println(rotev.getVoltage());
     going = false;     
   }
