@@ -461,7 +461,7 @@ double heading()
 void calibrateGyro(){
   rotev.ledWrite(0.0f, 0.1f, 0.1f);
   gyroOffset = 0;
-  int loops = 5000;
+  int loops = 10000;
   delay(5);
     for(int i = 0; i<=loops;i++){
       gyroOffset += rotev.readYawRateDegrees();
@@ -498,9 +498,26 @@ void loop() {
     calibrateGyro();
             delay(500);
 
-    // foward(50, 3);
-    // turnRight();
-    // turnLeft();
+     foward(25, 2);
+     foward(50, 3);
+          turnRight();
+
+     foward(50, 3);
+     turnRight();
+
+     foward(50, 3);
+      back(200, 12);
+      foward(50, 3);
+
+     turnRight();
+         foward(100, 6);
+     turnRight();
+     foward(50, 3);
+
+     
+     turnLeft();
+
+    foward(50,3);
     back(50, 3);
     Serial.println(rotev.getVoltage());
     going = false;     
